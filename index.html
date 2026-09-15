@@ -1,0 +1,1397 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Edukasi SSK - SMA YP 17</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            blue: '#0F4C81',
+                            gold: '#F59E0B',
+                            navy: '#1E293B',
+                            light: '#F8FAFC',
+                            accent: '#06B6D4'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+            user-select: none;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.4);
+        }
+        .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* ==========================================
+           ANIMASI ALA GAME INTERAKTIF
+        ========================================== */
+        .glass-card-interactive {
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .glass-card-interactive:hover {
+            transform: translateY(-6px) scale(1.02);
+            box-shadow: 0 15px 30px -5px rgba(245, 158, 11, 0.25), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
+            border-color: rgba(245, 158, 11, 0.6);
+        }
+
+        .btn-bounce {
+            transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .btn-bounce:hover {
+            transform: translateY(-2px) scale(1.04);
+            box-shadow: 0 8px 20px -4px rgba(245, 158, 11, 0.4);
+        }
+        .btn-bounce:active {
+            transform: translateY(1px) scale(0.96);
+        }
+
+        @keyframes pulse-subtle {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.85; transform: scale(0.98); }
+        }
+        .animate-pulse-subtle {
+            animation: pulse-subtle 3s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+        .animate-float {
+            animation: float 4s ease-in-out infinite;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+
+        @keyframes modalPop {
+            0% { opacity: 0; transform: scale(0.85) translateY(20px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .animate-modal-pop {
+            animation: modalPop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between overflow-x-hidden bg-slate-950 text-slate-100">
+
+    <!-- TOP BAR / HEADER -->
+    <header class="sticky top-0 z-40 glass-card border-b border-slate-800 bg-slate-900/90 px-4 py-3 shadow-lg">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="switchView('dashboard')">
+                <div class="w-10 h-10">
+                    <img src="assets/img/logo.png" alt="Logo SMA YP 17" class="w-full h-full object-cover rounded-xl shadow-md hover:scale-105 transition-transform">
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-lg leading-tight tracking-wide text-white flex items-center gap-2">
+                        SSK SMA YP 17
+                    </h1>
+                    <p class="text-xs text-slate-400">Sekolah Siaga Kependudukan & GenRe Hub</p>
+                </div>
+            </div>
+
+            <!-- Player Status Dynamic -->
+            <div class="flex items-center space-x-4">
+                <div class="hidden sm:flex items-center space-x-3 bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-700 shadow-inner">
+                    <div class="flex items-center space-x-1.5">
+                        <i class="fa-solid fa-star text-amber-400 text-sm animate-bounce"></i>
+                        <span id="player-score" class="font-bold text-sm text-slate-200">0</span>
+                        <span class="text-xs text-slate-400">Poin</span>
+                    </div>
+                    <div class="h-4 w-px bg-slate-700"></div>
+                    <div class="flex items-center space-x-1.5">
+                        <i class="fa-solid fa-coins text-yellow-400 text-sm"></i>
+                        <span id="player-coins" class="font-bold text-sm text-yellow-400">100</span>
+                    </div>
+                </div>
+
+                <!-- Tombol ini sekarang membuka Modal Popup -->
+                <button onclick="openModal('avatar-shop')" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition border border-slate-700 relative btn-bounce" title="Toko Avatar">
+                    <i class="fa-solid fa-user-gear"></i>
+                    <span id="avatar-dot" class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-amber-500 rounded-full animate-ping"></span>
+                </button>
+
+                <!-- Tombol ini sekarang membuka Modal Popup -->
+                <button onclick="openModal('encyclopedia')" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition border border-slate-700 btn-bounce" title="Pustaka Pintar SSK">
+                    <i class="fa-solid fa-book-open text-cyan-400"></i>
+                </button>
+
+                <button id="sound-toggle" onclick="toggleSound()" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition border border-slate-700 btn-bounce" title="Audio FX">
+                    <i id="sound-icon" class="fa-solid fa-volume-high text-emerald-400"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTAINER -->
+    <main class="flex-grow max-w-7xl w-full mx-auto p-4 md:p-6">
+
+        <!-- VIEW 1: DASHBOARD / HOME MAP -->
+        <section id="view-dashboard" class="space-y-6 animate-fade-in">
+            <!-- Hero Banner -->
+            <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-900 via-slate-900 to-amber-950 p-6 md:p-8 border border-slate-800 shadow-2xl">
+                <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none animate-pulse"></div>
+                <div class="relative z-10 max-w-2xl">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold mb-3">
+                        <i class="fa-solid fa-graduation-cap"></i> Modul Pembelajaran Interaktif SMA YP 17
+                    </div>
+                    <h2 class="text-2xl md:text-4xl font-extrabold text-white leading-tight mb-2">
+                        Petualangan Remaja SSK: <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-yellow-200">Terencana, Cerdas, Berkarakter</span>
+                    </h2>
+                    <p class="text-slate-300 text-sm md:text-base mb-6">
+                        Selesaikan 5 Level Misi Kependudukan, kumpulkan Koin SSK, buka Avatar eksklusif SMA YP 17, dan jadilah Agen Kebijakan Remaja Unggulan!
+                    </p>
+
+                    <div class="flex flex-wrap gap-3">
+                        <button onclick="startNextUncompletedLevel()" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-bold text-sm shadow-lg shadow-amber-500/20 btn-bounce flex items-center gap-2">
+                            <i class="fa-solid fa-play"></i> Lanjutkan Misi
+                        </button>
+                        <!-- Tombol ini sekarang membuka Modal Popup Misi Harian -->
+                        <button onclick="openModal('missions-daily')" class="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-medium text-sm border border-slate-700 btn-bounce flex items-center gap-2">
+                            <i class="fa-solid fa-list-check text-amber-400"></i> Misi Harian
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Overview Bar -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="glass-card p-4 rounded-xl flex items-center gap-3 glass-card-interactive">
+                    <div class="w-10 h-10 rounded-lg bg-blue-500/20 border border-blue-500/30 flex items-center justify-center text-blue-400 animate-float">
+                        <i class="fa-solid fa-trophy text-lg"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-400">Total Progres</p>
+                        <p id="stat-progress" class="text-lg font-bold text-white">0%</p>
+                    </div>
+                </div>
+                <div class="glass-card p-4 rounded-xl flex items-center gap-3 glass-card-interactive">
+                    <div class="w-10 h-10 rounded-lg bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 animate-float" style="animation-delay: 0.5s;">
+                        <i class="fa-solid fa-award text-lg"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-400">Lencana SSK</p>
+                        <p id="stat-badges" class="text-lg font-bold text-white">0/5</p>
+                    </div>
+                </div>
+                <div class="glass-card p-4 rounded-xl flex items-center gap-3 glass-card-interactive">
+                    <div class="w-10 h-10 rounded-lg bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400 animate-float" style="animation-delay: 1s;">
+                        <i class="fa-solid fa-user-graduate text-lg"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-400">Avatar Aktif</p>
+                        <p id="stat-avatar-name" class="text-sm font-bold text-amber-300 truncate">Siswa GenRe YP 17</p>
+                    </div>
+                </div>
+                <div class="glass-card p-4 rounded-xl flex items-center gap-3 glass-card-interactive">
+                    <div class="w-10 h-10 rounded-lg bg-cyan-500/20 border border-cyan-500/30 flex items-center justify-center text-cyan-400 animate-float" style="animation-delay: 1.5s;">
+                        <i class="fa-solid fa-heart-pulse text-lg"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-400">Status Remaja</p>
+                        <p class="text-sm font-bold text-cyan-300">Siaga & Sehat</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LEVEL MAP -->
+            <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-map-location-dot text-amber-400 animate-bounce"></i> Peta Jalur Pembelajaran SSK
+                    </h3>
+                    <span class="text-xs text-slate-400">Selesaikan level secara berurutan</span>
+                </div>
+
+                <div id="levels-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                    <!-- Dynamic rendering via JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW 2: GAMEPLAY CONTAINER (Dynamic rendering based on level) -->
+        <section id="view-gameplay" class="hidden space-y-6 animate-fade-in">
+            <!-- Game Top Header Bar -->
+            <div class="glass-card p-4 rounded-xl flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <button onclick="confirmExitGame()" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition btn-bounce">
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </button>
+                    <div>
+                        <span id="game-level-tag" class="text-xs font-semibold px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">LEVEL 1</span>
+                        <h3 id="game-title" class="font-bold text-white text-base md:text-lg">Fakta vs Mitos Pubertas & Gizi</h3>
+                    </div>
+                </div>
+
+                <div id="game-stats-header" class="flex items-center space-x-4 text-sm font-semibold">
+                    <!-- Dynamic stats per level -->
+                </div>
+            </div>
+
+            <!-- Game Content Arena -->
+            <div id="game-arena" class="glass-card p-6 rounded-2xl border border-slate-800 min-h-[420px] flex flex-col justify-between relative overflow-hidden shadow-2xl">
+                <!-- Inner content dynamically injected per level -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="border-t border-slate-800 bg-slate-900/50 py-4 px-4 mt-8 text-center text-xs text-slate-500">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+            <p>&copy; 2026 Game Edukasi SSK - SMA YP 17. Powered by BKKBN & GenRe Program.</p>
+            <p class="text-slate-400">Inovasi Digital Pendidikan Kependudukan</p>
+        </div>
+    </footer>
+
+    <!-- ==========================================
+         MODAL FITUR INTERAKTIF (POPUP DIUBAH MENJADI MODAL)
+    ========================================== -->
+    <div id="section-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="glass-card max-w-3xl w-full max-h-[85vh] rounded-2xl border border-slate-700 shadow-2xl flex flex-col overflow-hidden relative animate-modal-pop">
+
+            <!-- Modal Header -->
+            <div class="p-4 md:p-5 border-b border-slate-800 flex items-center justify-between bg-slate-900/90">
+                <h3 id="section-modal-title" class="text-xl font-bold text-white flex items-center gap-2">
+                    <!-- Dynamic Title -->
+                </h3>
+                <button onclick="closeSectionModal()" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition btn-bounce">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Modal Content Body -->
+            <div id="section-modal-body" class="p-4 md:p-6 overflow-y-auto custom-scrollbar flex-grow space-y-6">
+                <!-- Dynamically Injected Content -->
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL POPUP GLOBAL (For End Game & Level Result) -->
+    <div id="modal-container" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="glass-card max-w-md w-full p-6 rounded-2xl border border-slate-700 shadow-2xl space-y-5 text-center relative overflow-hidden animate-modal-pop">
+            <div id="modal-header-bg" class="absolute inset-x-0 top-0 h-2 bg-gradient-to-r from-amber-500 to-blue-500"></div>
+
+            <div id="modal-icon" class="w-16 h-16 rounded-2xl bg-amber-500/20 border border-amber-500/40 text-amber-400 flex items-center justify-center mx-auto text-3xl animate-bounce">
+                <i class="fa-solid fa-trophy"></i>
+            </div>
+
+            <div>
+                <h3 id="modal-title" class="text-2xl font-bold text-white mb-1">Misi Selesai!</h3>
+                <p id="modal-subtitle" class="text-slate-300 text-sm">Kamu berhasil menyelesaikan tantangan ini.</p>
+            </div>
+
+            <div id="modal-stats" class="bg-slate-900/80 p-4 rounded-xl border border-slate-800 space-y-2 text-left text-sm">
+                <!-- Dynamic level breakdown -->
+            </div>
+
+            <div class="flex gap-3">
+                <button id="modal-btn-retry" onclick="retryCurrentLevel()" class="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-sm transition btn-bounce">
+                    Coba Lagi
+                </button>
+                <button id="modal-btn-next" onclick="closeModalAndNavigate()" class="flex-1 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-sm shadow-lg shadow-amber-500/20 transition btn-bounce">
+                    Lanjut Misi
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPT APPLICATION CODE -->
+    <script>
+        /* ==========================================
+           1. DATA STRUCTURES & APP STATE
+        ========================================== */
+        const APP_STATE = {
+            score: 0,
+            coins: 100,
+            activeAvatar: 'avatar-1',
+            completedLevels: [false, false, false, false, false],
+            unlockedAvatars: ['avatar-1'],
+            soundEnabled: true,
+            currentLevelIndex: null,
+            dailyMissions: [
+                { id: 1, title: 'Pelajari Ensiklopedia', desc: 'Buka dan baca 1 artikel di Pustaka Pintar SSK', rewardCoins: 30, completed: false },
+                { id: 2, title: 'Master Pubertas', desc: 'Selesaikan Level 1 dengan skor minimal 80', rewardCoins: 50, completed: false },
+                { id: 3, title: 'Agen GenRe', desc: 'Selesaikan Level 2 Kota Rencana', rewardCoins: 50, completed: false }
+            ]
+        };
+
+        // AVATAR CATALOG
+        const AVATARS = [
+            { id: 'avatar-1', name: 'Siswa GenRe YP 17', price: 0, icon: 'fa-user-graduate', color: 'from-blue-500 to-indigo-600', desc: 'Pelajar aktif penggerak SSK.' },
+            { id: 'avatar-2', name: 'Duta Kesehatan Remaja', price: 150, icon: 'fa-user-nurse', color: 'from-emerald-500 to-teal-600', desc: 'Paham kebersihan & kespro.' },
+            { id: 'avatar-3', name: 'Perencana Kota GenRe', price: 250, icon: 'fa-user-tie', color: 'from-amber-500 to-yellow-600', desc: 'Ahli simulasi bonus demografi.' },
+            { id: 'avatar-4', name: 'Ksatria Triad KRR', price: 400, icon: 'fa-user-shield', color: 'from-rose-500 to-red-600', desc: 'Benteng pertahanan dari Narkoba & Seks Bebas.' }
+        ];
+
+        // ENSIKLOPEDIA CONTENT
+        const ENCYCLOPEDIA_DATA = [
+            {
+                id: 'pubertas',
+                title: 'Pubertas & Kesehatan Reproduksi',
+                icon: 'fa-venus-mars',
+                content: `
+                    <h4 class="text-lg font-bold text-amber-400 mb-2">Memahami Masa Pubertas</h4>
+                    <p class="text-slate-300 text-sm mb-3">Pubertas adalah masa peralihan dari anak-anak menuju dewasa yang ditandai dengan perubahan fisik, hormonal, dan psikologis.</p>
+                    <div class="bg-slate-900 p-3 rounded-lg border border-slate-800 mb-3 space-y-2 text-xs text-slate-300">
+                        <p><strong class="text-blue-400">Laki-Laki:</strong> Perubahan suara, mimpi basah, tumbuh jakun, serta perkembangan otot.</p>
+                        <p><strong class="text-pink-400">Perempuan:</strong> Menstruasi, perkembangan payudara, dan perubahan panggul.</p>
+                    </div>
+                    <h5 class="font-bold text-white text-sm mb-1">Prinsip Gizi Seimbang Remaja:</h5>
+                    <ul class="list-disc list-inside text-xs text-slate-300 space-y-1">
+                        <li>Konsumsi Tablet Tambah Darah (TTD) bagi remaja putri pencegah anemia.</li>
+                        <li>Pola makan Isi Piringku: Karbohidrat, Protein, Sayur, dan Buah secara seimbang.</li>
+                        <li>Menjaga kebersihan organ reproduksi secara rutin dan teratur.</li>
+                    </ul>
+                `
+            },
+            {
+                id: 'pup',
+                title: 'Pendewasaan Usia Pernikahan (PUP)',
+                icon: 'fa-rings-wedding',
+                content: `
+                    <h4 class="text-lg font-bold text-amber-400 mb-2">Program Generasi Berencana (GenRe)</h4>
+                    <p class="text-slate-300 text-sm mb-3">PUP adalah upaya untuk meningkatkan usia pernikahan pertama agar saat menikah mencapai usia ideal secara fisik, medis, dan finansial.</p>
+                    <div class="bg-amber-500/10 border border-amber-500/30 p-3 rounded-lg mb-3">
+                        <p class="text-amber-300 text-xs font-bold">Usia Minimal Ideal Menikah (BKKBN):</p>
+                        <p class="text-white text-base font-extrabold">Perempuan: 21 Tahun | Laki-Laki: 25 Tahun</p>
+                    </div>
+                    <h5 class="font-bold text-white text-sm mb-1">Mengapa Harus Ditunda?</h5>
+                    <p class="text-xs text-slate-300 leading-relaxed">Pernikahan dini berisiko tinggi menyebabkan stunting pada anak, tingginya angka kematian ibu/bayi, serta ketidaksiapan mental dan finansial keluarga baru.</p>
+                `
+            },
+            {
+                id: 'bonus-demografi',
+                title: 'Bonus Demografi',
+                icon: 'fa-chart-line',
+                content: `
+                    <h4 class="text-lg font-bold text-amber-400 mb-2">Peluang Emas Indonesia</h4>
+                    <p class="text-slate-300 text-sm mb-3">Bonus Demografi terjadi ketika jumlah penduduk usia produktif (15–64 tahun) lebih besar dibandingkan usia non-produktif.</p>
+                    <div class="grid grid-cols-2 gap-2 text-xs mb-3">
+                        <div class="bg-emerald-500/10 border border-emerald-500/30 p-2.5 rounded-lg text-emerald-300">
+                            <strong>Peluang:</strong> SDM Melimpah, Ekonomi Meningkat, Inovasi Pemuda.
+                        </div>
+                        <div class="bg-rose-500/10 border border-rose-500/30 p-2.5 rounded-lg text-rose-300">
+                            <strong>Ancaman:</strong> Pengangguran, Narkoba, Pernikahan Dini jika Remaja Tidak Berkualitas.
+                        </div>
+                    </div>
+                `
+            },
+            {
+                id: 'triad-krr',
+                title: 'Triad KRR (Ketahanan Remaja)',
+                icon: 'fa-shield-halved',
+                content: `
+                    <h4 class="text-lg font-bold text-amber-400 mb-2">3 Ancaman Utama Remaja (Triad KRR)</h4>
+                    <p class="text-slate-300 text-sm mb-3">Remaja SMA YP 17 berkomitmen terhindar dari tiga risiko kesehatan reproduksi remaja:</p>
+                    <ol class="list-decimal list-inside text-xs text-slate-300 space-y-2">
+                        <li><strong class="text-white">Pernikahan Dini:</strong> Menikah di bawah usia ideal.</li>
+                        <li><strong class="text-white">Seks Bebas / Sex Before Marriage:</strong> Berisiko menularkan PMS/HIV dan kehamilan tak diinginkan.</li>
+                        <li><strong class="text-white">NAPZA (Narkotika, Psikotropika & Zat Adiktif):</strong> Merusak saraf, masa depan, dan kesehatan.</li>
+                    </ol>
+                `
+            }
+        ];
+
+        // LEVEL DEFINITIONS
+        const LEVELS = [
+            {
+                id: 1,
+                name: 'Fakta vs Mitos Pubertas & Gizi',
+                desc: 'Klasifikasikan pernyataan mengenai pubertas, gizi seimbang, dan kebersihan diri.',
+                icon: 'fa-check-double',
+                color: 'from-blue-600 to-cyan-600',
+                badge: 'Agen Kespro'
+            },
+            {
+                id: 2,
+                name: 'Kota Rencana (Simulator Life-Path)',
+                desc: 'Kelola keputusan hidup dari SMA hingga usia matang untuk mencapai keseimbangan stat.',
+                icon: 'fa-city',
+                color: 'from-amber-600 to-yellow-600',
+                badge: 'Perencana GenRe'
+            },
+            {
+                id: 3,
+                name: 'Tangkap Bonus Demografi',
+                desc: 'Mini arcade game: Tangkap skill & edukasi, hindari narkoba & pernikahan dini.',
+                icon: 'fa-gamepad',
+                color: 'from-emerald-600 to-teal-600',
+                badge: 'Penggerak Demografi'
+            },
+            {
+                id: 4,
+                name: 'Speed Quiz Triad KRR',
+                desc: 'Jawab pertanyaan kilat tentang pencegahan Seks Bebas, Pernikahan Dini & NAPZA.',
+                icon: 'fa-bolt',
+                color: 'from-purple-600 to-indigo-600',
+                badge: 'Benteng Remaja'
+            },
+            {
+                id: 5,
+                name: 'Boss Challenge Metropolis SSK',
+                desc: 'Studi kasus kependudukan: Atasi krisis daerah dan ciptakan solusi kebijakan tepat.',
+                icon: 'fa-crown',
+                color: 'from-rose-600 to-red-600',
+                badge: 'Duta Utama SSK'
+            }
+        ];
+
+        /* ==========================================
+           2. AUDIO SYNTHESIS
+        ========================================== */
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playSound(type) {
+            if (!APP_STATE.soundEnabled) return;
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                const now = audioCtx.currentTime;
+
+                if (type === 'click') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(400, now);
+                    osc.frequency.exponentialRampToValueAtTime(800, now + 0.05);
+                    gain.gain.setValueAtTime(0.1, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.05);
+                    osc.start(now);
+                    osc.stop(now + 0.05);
+                } else if (type === 'correct') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(523.25, now);
+                    osc.frequency.setValueAtTime(659.25, now + 0.08);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.2);
+                    osc.start(now);
+                    osc.stop(now + 0.2);
+                } else if (type === 'wrong') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(220, now);
+                    osc.frequency.setValueAtTime(180, now + 0.1);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.2);
+                    osc.start(now);
+                    osc.stop(now + 0.2);
+                } else if (type === 'win') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(523.25, now);
+                    osc.frequency.setValueAtTime(659.25, now + 0.1);
+                    osc.frequency.setValueAtTime(783.99, now + 0.2);
+                    osc.frequency.setValueAtTime(1046.50, now + 0.3);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.5);
+                    osc.start(now);
+                    osc.stop(now + 0.5);
+                }
+            } catch(e) {}
+        }
+
+        function toggleSound() {
+            APP_STATE.soundEnabled = !APP_STATE.soundEnabled;
+            const icon = document.getElementById('sound-icon');
+            if (APP_STATE.soundEnabled) {
+                icon.className = 'fa-solid fa-volume-high text-emerald-400';
+            } else {
+                icon.className = 'fa-solid fa-volume-xmark text-rose-400';
+            }
+            playSound('click');
+        }
+
+        /* ==========================================
+           3. MODAL CONTROLLER BARU
+        ========================================== */
+        function openModal(type) {
+            playSound('click');
+            const modal = document.getElementById('section-modal');
+            const titleEl = document.getElementById('section-modal-title');
+            const bodyEl = document.getElementById('section-modal-body');
+
+            bodyEl.innerHTML = '';
+
+            if (type === 'avatar-shop') {
+                titleEl.innerHTML = `<i class="fa-solid fa-store text-amber-400"></i> Toko Avatar & Seragam SMA YP 17`;
+                bodyEl.innerHTML = `<div id="modal-avatar-catalog" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>`;
+                renderAvatarShopModal();
+            } else if (type === 'encyclopedia') {
+                titleEl.innerHTML = `<i class="fa-solid fa-book-bookmark text-cyan-400"></i> Pustaka Pintar SSK SMA YP 17`;
+                bodyEl.innerHTML = `
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="space-y-2" id="modal-encyclopedia-tabs"></div>
+                        <div class="md:col-span-2 glass-card p-5 rounded-xl border border-slate-800 min-h-[280px]" id="modal-encyclopedia-content"></div>
+                    </div>
+                `;
+                renderEncyclopediaModal();
+                completeDailyMission(1);
+            } else if (type === 'missions-daily') {
+                titleEl.innerHTML = `<i class="fa-solid fa-calendar-check text-amber-400"></i> Misi Harian Duta SSK`;
+                bodyEl.innerHTML = `<div id="modal-daily-missions-list" class="space-y-3"></div>`;
+                renderDailyMissionsModal();
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        function closeSectionModal() {
+            playSound('click');
+            document.getElementById('section-modal').classList.add('hidden');
+        }
+
+        /* ==========================================
+           4. ROUTING & UI RENDERERS
+        ========================================== */
+        function stopActiveLevelTimers() {
+            if (typeof l3State !== 'undefined') {
+                clearInterval(l3State.interval);
+                cancelAnimationFrame(l3State.animId);
+                l3State.interval = null;
+                l3State.animId = null;
+                window.removeEventListener('keydown', handleL3Key);
+            }
+            if (typeof l4State !== 'undefined') {
+                clearInterval(l4State.timerInterval);
+                l4State.timerInterval = null;
+            }
+        }
+
+        function switchView(viewName) {
+            playSound('click');
+            stopActiveLevelTimers();
+            const views = ['dashboard', 'gameplay'];
+            views.forEach(v => {
+                const el = document.getElementById(`view-${v}`);
+                if (el) el.classList.add('hidden');
+            });
+
+            const target = document.getElementById(`view-${viewName}`);
+            if (target) target.classList.remove('hidden');
+
+            if (viewName === 'dashboard') renderDashboard();
+            updatePlayerHeaderUI();
+        }
+
+        function updatePlayerHeaderUI() {
+            document.getElementById('player-score').innerText = APP_STATE.score;
+            document.getElementById('player-coins').innerText = APP_STATE.coins;
+
+            const completedCount = APP_STATE.completedLevels.filter(Boolean).length;
+            const progressPercent = Math.round((completedCount / LEVELS.length) * 100);
+
+            const statProg = document.getElementById('stat-progress');
+            if (statProg) statProg.innerText = `${progressPercent}%`;
+
+            const statBadges = document.getElementById('stat-badges');
+            if (statBadges) statBadges.innerText = `${completedCount}/${LEVELS.length}`;
+
+            const activeAvatarObj = AVATARS.find(a => a.id === APP_STATE.activeAvatar);
+            const statAv = document.getElementById('stat-avatar-name');
+            if (statAv && activeAvatarObj) statAv.innerText = activeAvatarObj.name;
+        }
+
+        function renderDashboard() {
+            const grid = document.getElementById('levels-grid');
+            grid.innerHTML = '';
+
+            LEVELS.forEach((level, idx) => {
+                const isUnlocked = idx === 0 || APP_STATE.completedLevels[idx - 1];
+                const isCompleted = APP_STATE.completedLevels[idx];
+
+                const card = document.createElement('div');
+                card.className = `glass-card p-5 rounded-2xl border ${isCompleted ? 'border-amber-500/50 bg-amber-500/5' : isUnlocked ? 'border-slate-700 glass-card-interactive cursor-pointer' : 'border-slate-800 opacity-60 pointer-events-none'} flex flex-col justify-between space-y-4 relative overflow-hidden`;
+
+                card.innerHTML = `
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-xs font-bold px-2.5 py-1 rounded-full ${isCompleted ? 'bg-amber-500 text-slate-950' : 'bg-slate-800 text-slate-300'} border border-slate-700">
+                                LEVEL ${level.id}
+                            </span>
+                            ${isCompleted ? '<span class="text-xs font-bold text-amber-400 flex items-center gap-1"><i class="fa-solid fa-circle-check animate-bounce"></i> Selesai</span>' : ''}
+                            ${!isUnlocked && !isCompleted ? '<span class="text-xs text-slate-500 flex items-center gap-1"><i class="fa-solid fa-lock"></i> Terkunci</span>' : ''}
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <div class="w-12 h-12 rounded-xl bg-gradient-to-tr ${level.color} flex items-center justify-center text-white text-xl shadow-md shrink-0 animate-float">
+                                <i class="fa-solid ${level.icon}"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-white text-base leading-tight mb-1">${level.name}</h4>
+                                <p class="text-xs text-slate-400 line-clamp-2">${level.desc}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-3 border-t border-slate-800 flex items-center justify-between">
+                        <span class="text-xs text-slate-400 flex items-center gap-1">
+                            <i class="fa-solid fa-award text-amber-400"></i> Lencana: <strong class="text-slate-200">${level.badge}</strong>
+                        </span>
+                        <button onclick="${isUnlocked ? `startLevel(${idx})` : ''}" class="px-3.5 py-1.5 rounded-lg ${isUnlocked ? 'bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold btn-bounce' : 'bg-slate-800 text-slate-500'} text-xs transition">
+                            ${isCompleted ? 'Main Lagi' : 'Mulai'}
+                        </button>
+                    </div>
+                `;
+
+                grid.appendChild(card);
+            });
+            updatePlayerHeaderUI();
+        }
+
+        function startNextUncompletedLevel() {
+            const nextIdx = APP_STATE.completedLevels.findIndex(status => !status);
+            if (nextIdx !== -1) {
+                startLevel(nextIdx);
+            } else {
+                startLevel(0);
+            }
+        }
+
+        /* ==========================================
+           5. GAMEPLAY MECHANICS (5 LEVELS)
+        ========================================== */
+        function startLevel(index) {
+            APP_STATE.currentLevelIndex = index;
+            switchView('gameplay');
+
+            const levelData = LEVELS[index];
+            document.getElementById('game-level-tag').innerText = `LEVEL ${levelData.id}`;
+            document.getElementById('game-title').innerText = levelData.name;
+
+            const arena = document.getElementById('game-arena');
+            arena.innerHTML = '';
+
+            if (index === 0) initLevel1(arena);
+            else if (index === 1) initLevel2(arena);
+            else if (index === 2) initLevel3(arena);
+            else if (index === 3) initLevel4(arena);
+            else if (index === 4) initLevel5(arena);
+        }
+
+        function confirmExitGame() {
+            if (confirm('Apakah kamu yakin ingin keluar ke menu utama? Progres level saat ini tidak tersimpan.')) {
+                switchView('dashboard');
+            }
+        }
+
+        // LEVEL 1: Fakta vs Mitos Pubertas & Gizi
+        let l1State = { score: 0, index: 0, cards: [] };
+        const L1_DATA = [
+            { text: "Mandi saat haid/menstruasi dapat membahayakan kesehatan organ wanita.", isFakta: false, explanation: "MITOS: Mandi saat menstruasi sangat dianjurkan untuk menjaga kebersihan dan hygiene panggul." },
+            { text: "Mimpi basah pada remaja laki-laki adalah hal biologis yang normal.", isFakta: true, explanation: "FAKTA: Ini adalah penanda alami kematangan organ reproduksi laki-laki." },
+            { text: "Remaja putri disarankan meminum Tablet Tambah Darah (TTD) pencegah anemia.", isFakta: true, explanation: "FAKTA: TTD mencegah anemia akibat kehilangan darah saat menstruasi." },
+            { text: "Minum es saat haid bisa menyebabkan pembekuan darah rahim.", isFakta: false, explanation: "MITOS: Minuman dingin masuk ke usus/pencernaan, bukan ke organ reproduksi/rahim." },
+            { text: "Jerawat pada masa remaja disebabkan oleh perubahan hormon pubertas.", isFakta: true, explanation: "FAKTA: Hormon androgen memicu produksi kelenjar minyak berlebih." }
+        ];
+
+        function initLevel1(arena) {
+            l1State = { score: 0, index: 0, cards: [...L1_DATA] };
+            document.getElementById('game-stats-header').innerHTML = `
+                <span class="text-slate-300">Skor: <strong id="l1-score" class="text-amber-400">0</strong></span>
+                <span class="text-slate-300">Kartu: <strong id="l1-card-num" class="text-cyan-400">1/5</strong></span>
+            `;
+            renderLevel1Card(arena);
+        }
+
+        function renderLevel1Card(arena) {
+            if (l1State.index >= l1State.cards.length) {
+                finishLevel(0, l1State.score, 100);
+                return;
+            }
+
+            const current = l1State.cards[l1State.index];
+            document.getElementById('l1-card-num').innerText = `${l1State.index + 1}/${l1State.cards.length}`;
+
+            arena.innerHTML = `
+                <div class="flex-1 flex flex-col justify-center items-center text-center max-w-lg mx-auto py-6 space-y-6 animate-fade-in">
+                    <div class="px-4 py-1.5 rounded-full bg-blue-500/20 text-blue-300 text-xs font-semibold border border-blue-500/30">
+                        Klasifikasikan Pernyataan
+                    </div>
+
+                    <div class="glass-card p-6 rounded-2xl border border-slate-700 shadow-xl w-full">
+                        <p class="text-slate-400 text-xs uppercase tracking-wider mb-2">Pernyataan #${l1State.index + 1}</p>
+                        <h4 class="text-lg md:text-xl font-bold text-white leading-snug">"${current.text}"</h4>
+                    </div>
+
+                    <div id="l1-feedback" class="hidden p-3 rounded-xl text-xs text-left w-full"></div>
+
+                    <div id="l1-actions" class="grid grid-cols-2 gap-4 w-full">
+                        <button onclick="handleL1Answer(true)" class="py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-base transition flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20 btn-bounce">
+                            <i class="fa-solid fa-circle-check"></i> FAKTA
+                        </button>
+                        <button onclick="handleL1Answer(false)" class="py-3.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-base transition flex items-center justify-center gap-2 shadow-lg shadow-rose-600/20 btn-bounce">
+                            <i class="fa-solid fa-circle-xmark"></i> MITOS
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function handleL1Answer(chosenFakta) {
+            const current = l1State.cards[l1State.index];
+            const isCorrect = chosenFakta === current.isFakta;
+            const feedbackEl = document.getElementById('l1-feedback');
+            const actionsEl = document.getElementById('l1-actions');
+
+            if (isCorrect) {
+                playSound('correct');
+                l1State.score += 20;
+                document.getElementById('l1-score').innerText = l1State.score;
+                feedbackEl.className = "p-4 rounded-xl text-xs text-left w-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-200 block animate-fade-in";
+                feedbackEl.innerHTML = `<strong><i class="fa-solid fa-circle-check"></i> TEPAT!</strong> ${current.explanation}`;
+            } else {
+                playSound('wrong');
+                feedbackEl.className = "p-4 rounded-xl text-xs text-left w-full bg-rose-500/20 border border-rose-500/40 text-rose-200 block animate-fade-in";
+                feedbackEl.innerHTML = `<strong><i class="fa-solid fa-circle-xmark"></i> KURANG TEPAT.</strong> ${current.explanation}`;
+            }
+
+            actionsEl.innerHTML = `
+                <button onclick="nextL1Card()" class="col-span-2 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-sm transition btn-bounce">
+                    Lanjut Pernyataan Berikutnya <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            `;
+        }
+
+        function nextL1Card() {
+            playSound('click');
+            l1State.index++;
+            renderLevel1Card(document.getElementById('game-arena'));
+        }
+
+        // LEVEL 2: Kota Rencana (Simulator Life-Path PUP/GenRe)
+        let l2State = { step: 0, stats: { edu: 50, health: 50, econ: 50, happy: 50 } };
+        const L2_STEPS = [
+            {
+                age: "Usia 17 Tahun (SMA YP 17)",
+                title: "Lulus SMA: Pilihan Langkah Pertama",
+                options: [
+                    { text: "Lanjut Kuliah / Pelatihan Skill Komprehensif", stats: { edu: +20, health: 0, econ: -10, happy: +10 } },
+                    { text: "Bekerja Mandiri & Ikut Kegiatan Ekstrakurikuler", stats: { edu: +10, health: 0, econ: +15, happy: +5 } },
+                    { text: "Terburu-buru Menikah Muda Tanpa Persiapan", stats: { edu: -25, health: -15, econ: -25, happy: -20 } }
+                ]
+            },
+            {
+                age: "Usia 21 Tahun",
+                title: "Peluang Karir & Hubungan Sosial",
+                options: [
+                    { text: "Fokus Mengembangkan Karir & Organisasi Pemuda SSK", stats: { edu: +15, health: +10, econ: +20, happy: +10 } },
+                    { text: "Menikah di Usia 21 (Sudah Ideal Usia Minimal Wanita)", stats: { edu: 0, health: +5, econ: -5, happy: +10 } },
+                    { text: "Gaya Hidup Konsumtif Tanpa Tabungan Masa Depan", stats: { edu: 0, health: -10, econ: -30, happy: +5 } }
+                ]
+            },
+            {
+                age: "Usia 25 Tahun",
+                title: "Kematangan Hidup & Perencanaan Keluarga",
+                options: [
+                    { text: "Menikah Secara Terencana dengan Kesiapan Finansial/Kesehatan", stats: { edu: +5, health: +15, econ: +15, happy: +25 } },
+                    { text: "Mengabaikan Pemeriksaan Kesehatan Catin (Calon Pengantin)", stats: { edu: 0, health: -20, econ: 0, happy: -10 } }
+                ]
+            }
+        ];
+
+        function initLevel2(arena) {
+            l2State = { step: 0, stats: { edu: 50, health: 50, econ: 50, happy: 50 } };
+            document.getElementById('game-stats-header').innerHTML = `<span class="text-xs text-slate-300">Simulator Life-Path PUP</span>`;
+            renderLevel2Step(arena);
+        }
+
+        function renderLevel2Step(arena) {
+            if (l2State.step >= L2_STEPS.length) {
+                const totalScore = Math.min(100, Math.round((l2State.stats.edu + l2State.stats.health + l2State.stats.econ + l2State.stats.happy) / 2.4));
+                finishLevel(1, totalScore, 120);
+                completeDailyMission(3);
+                return;
+            }
+
+            const current = L2_STEPS[l2State.step];
+
+            arena.innerHTML = `
+                <div class="space-y-6 max-w-2xl mx-auto w-full animate-fade-in">
+                    <div class="grid grid-cols-4 gap-2 bg-slate-900/80 p-3 rounded-xl border border-slate-800">
+                        <div class="text-center">
+                            <span class="text-[10px] text-slate-400 block">Pendidikan</span>
+                            <span class="font-bold text-sm text-blue-400">${l2State.stats.edu}%</span>
+                        </div>
+                        <div class="text-center">
+                            <span class="text-[10px] text-slate-400 block">Kesehatan</span>
+                            <span class="font-bold text-sm text-emerald-400">${l2State.stats.health}%</span>
+                        </div>
+                        <div class="text-center">
+                            <span class="text-[10px] text-slate-400 block">Ekonomi</span>
+                            <span class="font-bold text-sm text-amber-400">${l2State.stats.econ}%</span>
+                        </div>
+                        <div class="text-center">
+                            <span class="text-[10px] text-slate-400 block">Kebahagiaan</span>
+                            <span class="font-bold text-sm text-pink-400">${l2State.stats.happy}%</span>
+                        </div>
+                    </div>
+
+                    <div class="glass-card p-5 rounded-xl border border-amber-500/30">
+                        <span class="text-xs font-bold px-2.5 py-0.5 rounded bg-amber-500/20 text-amber-300">${current.age}</span>
+                        <h4 class="text-lg font-bold text-white mt-2">${current.title}</h4>
+                        <p class="text-xs text-slate-300 mt-1">Pilihlah keputusan hidup yang berdampak pada kualitas masa depanmu:</p>
+                    </div>
+
+                    <div class="space-y-3">
+                        ${current.options.map((opt, i) => `
+                            <button onclick="chooseL2Option(${i})" class="w-full text-left p-4 rounded-xl glass-card glass-card-interactive border border-slate-700 hover:border-amber-400 text-sm font-medium text-slate-200 flex items-center justify-between">
+                                <span>${opt.text}</span>
+                                <i class="fa-solid fa-chevron-right text-amber-400 text-xs"></i>
+                            </button>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function chooseL2Option(index) {
+            playSound('correct');
+            const opt = L2_STEPS[l2State.step].options[index];
+            l2State.stats.edu = Math.max(0, Math.min(100, l2State.stats.edu + opt.stats.edu));
+            l2State.stats.health = Math.max(0, Math.min(100, l2State.stats.health + opt.stats.health));
+            l2State.stats.econ = Math.max(0, Math.min(100, l2State.stats.econ + opt.stats.econ));
+            l2State.stats.happy = Math.max(0, Math.min(100, l2State.stats.happy + opt.stats.happy));
+
+            l2State.step++;
+            renderLevel2Step(document.getElementById('game-arena'));
+        }
+
+        // LEVEL 3: Tangkap Bonus Demografi
+        let l3State = { score: 0, timer: 30, interval: null, canvas: null, ctx: null, playerX: 180, items: [], animId: null };
+
+        function initLevel3(arena) {
+            l3State = { score: 0, timer: 30, interval: null, canvas: null, ctx: null, playerX: 180, items: [], animId: null };
+
+            document.getElementById('game-stats-header').innerHTML = `
+                <span class="text-slate-300">Skor: <strong id="l3-score" class="text-amber-400">0</strong></span>
+                <span class="text-slate-300">Waktu: <strong id="l3-timer" class="text-cyan-400">30s</strong></span>
+            `;
+
+            arena.innerHTML = `
+                <div class="flex flex-col items-center justify-center space-y-3 w-full animate-fade-in">
+                    <p class="text-xs text-slate-300 text-center">Gunakan Tombol Panah / Geser Layar untuk menangkap <span class="text-emerald-400 font-bold">Peluang SDM</span> dan hindari <span class="text-rose-400 font-bold">Ancaman Demografi</span>!</p>
+
+                    <div class="relative w-full max-w-md bg-slate-900 rounded-xl border border-slate-700 overflow-hidden shadow-inner">
+                        <canvas id="l3-canvas" width="360" height="280" class="w-full h-auto block"></canvas>
+                    </div>
+
+                    <div class="flex gap-4 w-full max-w-md">
+                        <button id="btn-left" class="flex-1 py-3 bg-slate-800 hover:bg-slate-700 active:bg-amber-500 rounded-xl text-white font-bold text-lg border border-slate-700 btn-bounce">
+                            <i class="fa-solid fa-arrow-left"></i> Kiri
+                        </button>
+                        <button id="btn-right" class="flex-1 py-3 bg-slate-800 hover:bg-slate-700 active:bg-amber-500 rounded-xl text-white font-bold text-lg border border-slate-700 btn-bounce">
+                            Kanan <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            l3State.canvas = document.getElementById('l3-canvas');
+            l3State.ctx = l3State.canvas.getContext('2d');
+
+            window.addEventListener('keydown', handleL3Key);
+            document.getElementById('btn-left').addEventListener('click', () => moveL3Player(-30));
+            document.getElementById('btn-right').addEventListener('click', () => moveL3Player(30));
+
+            l3State.interval = setInterval(() => {
+                l3State.timer--;
+                document.getElementById('l3-timer').innerText = `${l3State.timer}s`;
+                if (l3State.timer <= 0) {
+                    stopL3Game();
+                    finishLevel(2, l3State.score, 100);
+                }
+            }, 1000);
+
+            requestAnimationFrame(updateL3Canvas);
+        }
+
+        function handleL3Key(e) {
+            if (e.key === 'ArrowLeft') moveL3Player(-25);
+            if (e.key === 'ArrowRight') moveL3Player(25);
+        }
+
+        function moveL3Player(delta) {
+            l3State.playerX = Math.max(20, Math.min(340, l3State.playerX + delta));
+        }
+
+        function updateL3Canvas() {
+            if (l3State.timer <= 0) return;
+
+            const ctx = l3State.ctx;
+            const w = l3State.canvas.width;
+            const h = l3State.canvas.height;
+
+            ctx.clearRect(0, 0, w, h);
+
+            ctx.fillStyle = '#F59E0B';
+            ctx.fillRect(l3State.playerX - 25, h - 20, 50, 12);
+            ctx.fillStyle = '#1E293B';
+            ctx.fillRect(l3State.playerX - 20, h - 18, 40, 8);
+
+            if (Math.random() < 0.05) {
+                const isGood = Math.random() > 0.4;
+                const labelsGood = ['Pendidikan', 'Skill Digital', 'Kesehatan', 'Kewirausahaan'];
+                const labelsBad = ['Narkoba', 'Pernikahan Dini', 'Seks Bebas', 'Pengangguran'];
+
+                l3State.items.push({
+                    x: Math.random() * (w - 40) + 20,
+                    y: 0,
+                    speed: Math.random() * 2 + 1.5,
+                    isGood: isGood,
+                    text: isGood ? labelsGood[Math.floor(Math.random()*labelsGood.length)] : labelsBad[Math.floor(Math.random()*labelsBad.length)]
+                });
+            }
+
+            for (let i = l3State.items.length - 1; i >= 0; i--) {
+                const item = l3State.items[i];
+                item.y += item.speed;
+
+                ctx.fillStyle = item.isGood ? '#10B981' : '#EF4444';
+                ctx.beginPath();
+                ctx.arc(item.x, item.y, 10, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.font = '8px sans-serif';
+                ctx.fillStyle = '#FFFFFF';
+                ctx.textAlign = 'center';
+                ctx.fillText(item.text, item.x, item.y - 12);
+
+                if (item.y >= h - 25 && item.y <= h - 10 && Math.abs(item.x - l3State.playerX) < 30) {
+                    if (item.isGood) {
+                        playSound('correct');
+                        l3State.score += 10;
+                    } else {
+                        playSound('wrong');
+                        l3State.score = Math.max(0, l3State.score - 10);
+                    }
+                    document.getElementById('l3-score').innerText = l3State.score;
+                    l3State.items.splice(i, 1);
+                    continue;
+                }
+
+                if (item.y > h) {
+                    l3State.items.splice(i, 1);
+                }
+            }
+
+            l3State.animId = requestAnimationFrame(updateL3Canvas);
+        }
+
+        function stopL3Game() {
+            clearInterval(l3State.interval);
+            cancelAnimationFrame(l3State.animId);
+            window.removeEventListener('keydown', handleL3Key);
+        }
+
+        // LEVEL 4: Speed Quiz Triad KRR
+        let l4State = { index: 0, score: 0, timer: 15, timerInterval: null };
+        const L4_DATA = [
+            { q: "Apa kepanjangan dari Triad KRR?", a: ["Tiga Risiko Ancaman Remaja Kependudukan", "Tiga Risiko Kehidupan Remaja", "Tiga Risiko Kesehatan Reproduksi Remaja", "Tiga Rencana Kualitas Remaja"], correct: 2 },
+            { q: "Usia ideal menikah bagi perempuan menurut BKKBN adalah...", a: ["17 Tahun", "19 Tahun", "21 Tahun", "25 Tahun"], correct: 2 },
+            { q: "Salah satu dampak negatif dari pernikahan dini adalah...", a: ["Meningkatnya risiko stunting pada anak", "Karir berkembang pesat", "Masa depan makin terjamin", "Pendidikan makin tinggi"], correct: 0 },
+            { q: "Pusat kegiatan edukasi konseling remaja yang dibentuk BKKBN bernama...", a: ["PIK-R", "Karang Taruna", "PMR", "OSIS"], correct: 0 }
+        ];
+
+        function initLevel4(arena) {
+            l4State = { index: 0, score: 0, timer: 15, timerInterval: null };
+            document.getElementById('game-stats-header').innerHTML = `
+                <span class="text-slate-300">Skor: <strong id="l4-score" class="text-amber-400">0</strong></span>
+                <span class="text-slate-300">Waktu: <strong id="l4-timer" class="text-rose-400">15s</strong></span>
+            `;
+            renderLevel4Quiz(arena);
+        }
+
+        function renderLevel4Quiz(arena) {
+            if (l4State.index >= L4_DATA.length) {
+                finishLevel(3, l4State.score, 100);
+                return;
+            }
+
+            const current = L4_DATA[l4State.index];
+            l4State.timer = 15;
+            document.getElementById('l4-timer').innerText = `${l4State.timer}s`;
+
+            clearInterval(l4State.timerInterval);
+            l4State.timerInterval = setInterval(() => {
+                l4State.timer--;
+                document.getElementById('l4-timer').innerText = `${l4State.timer}s`;
+                if (l4State.timer <= 0) {
+                    playSound('wrong');
+                    clearInterval(l4State.timerInterval);
+                    l4State.index++;
+                    renderLevel4Quiz(arena);
+                }
+            }, 1000);
+
+            arena.innerHTML = `
+                <div class="max-w-xl mx-auto w-full space-y-5 animate-fade-in">
+                    <div class="flex justify-between items-center text-xs text-slate-400">
+                        <span>Soal ${l4State.index + 1} dari ${L4_DATA.length}</span>
+                        <span>Ketahanan Remaja (Triad KRR)</span>
+                    </div>
+
+                    <div class="glass-card p-5 rounded-2xl border border-slate-700">
+                        <h4 class="text-lg font-bold text-white leading-snug">${current.q}</h4>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        ${current.a.map((opt, i) => `
+                            <button onclick="handleL4Answer(${i})" class="p-4 rounded-xl glass-card glass-card-interactive border border-slate-700 hover:border-amber-400 text-sm text-left text-slate-200 font-medium transition">
+                                <span class="inline-block w-6 text-amber-400 font-bold">${String.fromCharCode(65 + i)}.</span> ${opt}
+                            </button>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function handleL4Answer(chosenIndex) {
+            clearInterval(l4State.timerInterval);
+            const current = L4_DATA[l4State.index];
+
+            if (chosenIndex === current.correct) {
+                playSound('correct');
+                l4State.score += 25;
+                document.getElementById('l4-score').innerText = l4State.score;
+            } else {
+                playSound('wrong');
+            }
+
+            l4State.index++;
+            renderLevel4Quiz(document.getElementById('game-arena'));
+        }
+
+        // LEVEL 5: Boss Challenge Metropolis SSK
+        let l5State = { score: 0, index: 0 };
+        const L5_CASES = [
+            {
+                title: "Krisis Angka Putus Sekolah & Pernikahan Dini di Wilayah X",
+                desc: "Data menunjukkan angka pernikahan dini meningkat 30% dan banyak remaja putri tidak menyelesaikan SMA.",
+                options: [
+                    { text: "Bentuk Program Pojok Kependudukan & Sosialisasi PIK-R di Sekolah", score: 35, explanation: "Tepat! Edukasi langsung dan wadah konseling teman sebaya efektif menekan angka nikah dini." },
+                    { text: "Membiarkan karena dianggap tradisi masyarakat setempat", score: 0, explanation: "Salah! Tradisi buruk yang merusak masa depan remaja harus ditransformasi." }
+                ]
+            },
+            {
+                title: "Tantangan Kualitas Bonus Demografi SMA YP 17",
+                desc: "Persaingan dunia kerja tinggi. Siswa membutuhkan kesiapan skill masa depan.",
+                options: [
+                    { text: "Mengadakan Pelatihan Digital, Literasi Keuangan, & Perencanaan Karir", score: 35, explanation: "Sangat Tepat! Ini mempersiapkan SDM unggul untuk menangkap Bonus Demografi." },
+                    { text: "Fokus hanya pada pelajaran teori tanpa praktik lapangan", score: 10, explanation: "Kurang optimal! Keterampilan praktis sangat dibutuhkan di era modern." }
+                ]
+            },
+            {
+                title: "Pencegahan Penyalahgunaan NAPZA di Lingkungan Remaja",
+                desc: "Marak peredaran obat-obatan terlarang yang menyasar anak usia sekolah.",
+                options: [
+                    { text: "Membentuk Satgas Duta SSK Anti-NAPZA & Kampanye Kreatif", score: 30, explanation: "Luar biasa! Duta peer-educator terbukti ampuh membentengi teman sebaya." },
+                    { text: "Mengenakan denda uang tanpa memberikan edukasi pemulihan", score: 5, explanation: "Kurang tepat! Edukasi dan pencegahan adalah kunci utama." }
+                ]
+            }
+        ];
+
+        function initLevel5(arena) {
+            l5State = { score: 0, index: 0 };
+            document.getElementById('game-stats-header').innerHTML = `
+                <span class="text-slate-300">Skor Pembuat Kebijakan: <strong id="l5-score" class="text-amber-400">0</strong></span>
+            `;
+            renderLevel5Case(arena);
+        }
+
+        function renderLevel5Case(arena) {
+            if (l5State.index >= L5_CASES.length) {
+                finishLevel(4, l5State.score, 100);
+                return;
+            }
+
+            const current = L5_CASES[l5State.index];
+
+            arena.innerHTML = `
+                <div class="max-w-2xl mx-auto w-full space-y-5 animate-fade-in">
+                    <div class="flex items-center space-x-2 text-rose-400 font-bold text-xs">
+                        <i class="fa-solid fa-triangle-exclamation animate-bounce"></i>
+                        <span>STUDI KASUS KEPENDUDUKAN #${l5State.index + 1}</span>
+                    </div>
+
+                    <div class="glass-card p-5 rounded-xl border border-rose-500/30">
+                        <h4 class="text-lg font-bold text-white mb-2">${current.title}</h4>
+                        <p class="text-xs text-slate-300 leading-relaxed">${current.desc}</p>
+                    </div>
+
+                    <p class="text-xs text-slate-400">Pilih Solusi Kebijakan Terbaik:</p>
+
+                    <div class="space-y-3">
+                        ${current.options.map((opt, i) => `
+                            <button onclick="chooseL5Option(${i})" class="w-full text-left p-4 rounded-xl glass-card glass-card-interactive border border-slate-700 hover:border-amber-400 text-sm font-medium text-slate-200">
+                                ${opt.text}
+                            </button>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function chooseL5Option(optionIndex) {
+            const current = L5_CASES[l5State.index];
+            const chosen = current.options[optionIndex];
+
+            if (chosen.score > 20) playSound('correct');
+            else playSound('wrong');
+
+            l5State.score += chosen.score;
+            document.getElementById('l5-score').innerText = l5State.score;
+
+            const arena = document.getElementById('game-arena');
+            arena.innerHTML = `
+                <div class="max-w-md mx-auto text-center py-6 space-y-4 animate-fade-in">
+                    <div class="w-12 h-12 rounded-full ${chosen.score > 20 ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-rose-500/20 text-rose-400 border-rose-500/30'} border flex items-center justify-center mx-auto text-2xl">
+                        <i class="fa-solid ${chosen.score > 20 ? 'fa-check' : 'fa-xmark'}"></i>
+                    </div>
+                    <h4 class="text-lg font-bold text-white">Hasil Analisis Kebijakan</h4>
+                    <p class="text-xs text-slate-300 bg-slate-900 p-4 rounded-xl border border-slate-800">${chosen.explanation}</p>
+                    <button onclick="nextL5Case()" class="w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-sm transition btn-bounce">
+                        Lanjut Kasus Berikutnya <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            `;
+        }
+
+        function nextL5Case() {
+            playSound('click');
+            l5State.index++;
+            renderLevel5Case(document.getElementById('game-arena'));
+        }
+
+        /* ==========================================
+           6. LEVEL COMPLETION & REWARDS LOGIC
+        ========================================== */
+        function finishLevel(levelIdx, score, maxScore) {
+            playSound('win');
+            APP_STATE.completedLevels[levelIdx] = true;
+
+            const earnedCoins = Math.round(score * 0.8);
+            APP_STATE.score += score;
+            APP_STATE.coins += earnedCoins;
+
+            updatePlayerHeaderUI();
+
+            if (levelIdx === 0 && score >= 80) completeDailyMission(2);
+
+            const modal = document.getElementById('modal-container');
+            document.getElementById('modal-title').innerText = `Level ${levelIdx + 1} Selesai!`;
+            document.getElementById('modal-subtitle').innerText = `Selamat! Kamu berhasil menyelesaikan ${LEVELS[levelIdx].name}.`;
+
+            document.getElementById('modal-stats').innerHTML = `
+                <div class="flex justify-between items-center">
+                    <span class="text-slate-400">Skor Diperoleh:</span>
+                    <span class="font-bold text-amber-400 text-base">${score} Poin</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-slate-400">Bonus Koin SSK:</span>
+                    <span class="font-bold text-yellow-400 text-base">+${earnedCoins} Koin</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-slate-400">Lencana Diterima:</span>
+                    <span class="font-bold text-emerald-400 text-xs px-2 py-0.5 rounded bg-emerald-500/20 border border-emerald-500/30">${LEVELS[levelIdx].badge}</span>
+                </div>
+            `;
+
+            modal.classList.remove('hidden');
+        }
+
+        function closeModalAndNavigate() {
+            playSound('click');
+            document.getElementById('modal-container').classList.add('hidden');
+            switchView('dashboard');
+        }
+
+        function retryCurrentLevel() {
+            playSound('click');
+            document.getElementById('modal-container').classList.add('hidden');
+            if (APP_STATE.currentLevelIndex !== null) {
+                startLevel(APP_STATE.currentLevelIndex);
+            }
+        }
+
+        /* ==========================================
+           7. RENDERERS UNTUK MODAL FITUR
+        ========================================== */
+        function renderAvatarShopModal() {
+            const catalog = document.getElementById('modal-avatar-catalog');
+            if (!catalog) return;
+            catalog.innerHTML = '';
+
+            AVATARS.forEach(av => {
+                const isUnlocked = APP_STATE.unlockedAvatars.includes(av.id);
+                const isActive = APP_STATE.activeAvatar === av.id;
+
+                const card = document.createElement('div');
+                card.className = `glass-card p-4 rounded-xl border ${isActive ? 'border-amber-400 bg-amber-500/10' : 'border-slate-800'} flex flex-col justify-between items-center text-center space-y-3 glass-card-interactive`;
+
+                card.innerHTML = `
+                    <div class="w-16 h-16 rounded-xl bg-gradient-to-tr ${av.color} flex items-center justify-center text-white text-2xl shadow-lg my-1 animate-float">
+                        <i class="fa-solid ${av.icon}"></i>
+                    </div>
+
+                    <div>
+                        <h4 class="font-bold text-white text-sm">${av.name}</h4>
+                        <p class="text-xs text-slate-400 mt-1">${av.desc}</p>
+                    </div>
+
+                    <div class="w-full pt-2">
+                        ${isActive ? `
+                            <button disabled class="w-full py-2 rounded-xl bg-amber-500/20 text-amber-300 font-bold text-xs border border-amber-500/40">
+                                Digunakan
+                            </button>
+                        ` : isUnlocked ? `
+                            <button onclick="useAvatar('${av.id}')" class="w-full py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs transition border border-slate-700 btn-bounce">
+                                Gunakan
+                            </button>
+                        ` : `
+                            <button onclick="buyAvatar('${av.id}', ${av.price})" class="w-full py-2 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-bold text-xs transition flex items-center justify-center gap-1 shadow-md btn-bounce">
+                                <i class="fa-solid fa-coins text-xs"></i> Beli (${av.price})
+                            </button>
+                        `}
+                    </div>
+                `;
+
+                catalog.appendChild(card);
+            });
+        }
+
+        function buyAvatar(avatarId, price) {
+            if (APP_STATE.coins >= price) {
+                playSound('correct');
+                APP_STATE.coins -= price;
+                APP_STATE.unlockedAvatars.push(avatarId);
+                APP_STATE.activeAvatar = avatarId;
+                renderAvatarShopModal();
+                updatePlayerHeaderUI();
+            } else {
+                playSound('wrong');
+                alert('Koin SSK kamu tidak cukup! Selesaikan lebih banyak level untuk mengumpulkan koin.');
+            }
+        }
+
+        function useAvatar(avatarId) {
+            playSound('click');
+            APP_STATE.activeAvatar = avatarId;
+            renderAvatarShopModal();
+            updatePlayerHeaderUI();
+        }
+
+        function renderEncyclopediaModal() {
+            const tabsContainer = document.getElementById('modal-encyclopedia-tabs');
+            const contentContainer = document.getElementById('modal-encyclopedia-content');
+
+            if (!tabsContainer || !contentContainer) return;
+            tabsContainer.innerHTML = '';
+
+            ENCYCLOPEDIA_DATA.forEach((item) => {
+                const btn = document.createElement('button');
+                btn.className = `w-full text-left p-3 rounded-xl glass-card border border-slate-800 hover:border-cyan-500/50 text-xs font-semibold text-slate-200 transition flex items-center gap-2 btn-bounce`;
+                btn.innerHTML = `<i class="fa-solid ${item.icon} text-cyan-400 text-sm"></i> ${item.title}`;
+                btn.onclick = () => {
+                    playSound('click');
+                    contentContainer.innerHTML = item.content;
+                };
+                tabsContainer.appendChild(btn);
+            });
+
+            contentContainer.innerHTML = ENCYCLOPEDIA_DATA[0].content;
+        }
+
+        function renderDailyMissionsModal() {
+            const list = document.getElementById('modal-daily-missions-list');
+            if (!list) return;
+            list.innerHTML = '';
+
+            APP_STATE.dailyMissions.forEach(m => {
+                const card = document.createElement('div');
+                card.className = `glass-card p-4 rounded-xl border border-slate-800 flex items-center justify-between glass-card-interactive`;
+
+                card.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded-lg ${m.completed ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-800 text-slate-400'} flex items-center justify-center text-lg">
+                            <i class="fa-solid ${m.completed ? 'fa-check' : 'fa-list-check'}"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-white text-sm">${m.title}</h4>
+                            <p class="text-xs text-slate-400">${m.desc}</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center space-x-3">
+                        <span class="text-xs font-bold text-yellow-400 flex items-center gap-1">
+                            <i class="fa-solid fa-coins"></i> +${m.rewardCoins}
+                        </span>
+                        <span class="text-xs px-3 py-1 rounded-full ${m.completed ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-slate-800 text-slate-500'}">
+                            ${m.completed ? 'Selesai' : 'Belum'}
+                        </span>
+                    </div>
+                `;
+
+                list.appendChild(card);
+            });
+        }
+
+        function completeDailyMission(missionId) {
+            const mission = APP_STATE.dailyMissions.find(m => m.id === missionId);
+            if (mission && !mission.completed) {
+                mission.completed = true;
+                APP_STATE.coins += mission.rewardCoins;
+                updatePlayerHeaderUI();
+            }
+        }
+
+        /* ==========================================
+           8. INITIALIZATION
+        ========================================== */
+        window.addEventListener('DOMContentLoaded', () => {
+            renderDashboard();
+        });
+    </script>
+</body>
+</html>
